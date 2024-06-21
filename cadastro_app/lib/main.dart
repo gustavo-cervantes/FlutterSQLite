@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
+import 'cadastro.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,11 +10,11 @@ class MyApp extends StatelessWidget {
   @override 
   Widget build(BuildContext context) {
     return MaterialApp(
-      title 'Cadastro App'
+      title: 'Cadastro App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: HomePage(),
     );
   }
 }
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
               controller: _numericoController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Numérico'),
-            )
+            ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _insertCadastro,
@@ -60,17 +60,24 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
 
-Future<void> _insertCadastro() async {
-  String texto = _textoController.text.trim();
-  int numerico = int.tryParse(_numericoController.text.trim()) ?? 0;
+  Future<void> _insertCadastro() async {
+    String texto = _textoController.text.trim();
+    int numerico = int.tryParse(_numericoController.text.trim()) ?? 0;
 
-  if (texto.isEmpty || numerico <= 0) {
-    return;
+    if (texto.isEmpty || numerico <= 0) {
+      return;
+    }
+
+    Cadastro cadastro = Cadastro(texto: texto, numerico: numerico);
+    int id = await _dbHelper.insert(cadastro.toMap());
+    print('Novo cadastro com ID: $id');
+
+    _resetForm();
   }
 
+  void _resetForm() {
+    _textoController.clear();
+    _numericoController.clear();
+  }
 }
-
-
-
