@@ -66,18 +66,42 @@ class _HomePageState extends State<HomePage> {
     int numerico = int.tryParse(_numericoController.text.trim()) ?? 0;
 
     if (texto.isEmpty || numerico <= 0) {
+      _showErrorDialog('Todos os campos são obrigatórios e o campo numérico deve ser maior que zero.');
       return;
     }
 
     Cadastro cadastro = Cadastro(texto: texto, numerico: numerico);
-    int id = await _dbHelper.insert(cadastro.toMap());
-    print('Novo cadastro com ID: $id');
-
-    _resetForm();
+    try {
+      int id = await _dbHelper.insert(cadastro.toMap());
+      print('Novo cadastro com ID: $id');
+      _resetForm();
+    } catch (e) {
+      _showErrorDialog('Erro ao inserir cadastro: ${e.toString()}');
+    }
   }
 
   void _resetForm() {
     _textoController.clear();
     _numericoController.clear();
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Erro'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
