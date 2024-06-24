@@ -1,0 +1,10 @@
+{
+    "cmake.generator": "Visual Studio 16 2024",
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.preferredGenerators": [
+      "Visual Studio 16 2024"
+    ]
+  }
+  
