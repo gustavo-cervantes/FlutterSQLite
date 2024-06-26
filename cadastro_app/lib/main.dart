@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
-import 'cadastro.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'database_helper.dart'; // Supondo que este seja o nome do arquivo que contém DatabaseHelper
+import 'cadastro.dart'; // Supondo que este seja o nome do arquivo que contém a classe Cadastro
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializa o suporte ao FFI
+  sqfliteFfiInit();
+
+  // Define o databaseFactory para utilizar o sqflite_common_ffi
+  databaseFactory = databaseFactoryFfi;
+
   runApp(MyApp());
 }
 
@@ -27,7 +36,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _textoController = TextEditingController();
   final TextEditingController _numericoController = TextEditingController();
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  final DatabaseHelper _dbHelper = DatabaseHelper(); // Use o construtor da classe DatabaseHelper
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +81,7 @@ class _HomePageState extends State<HomePage> {
 
     Cadastro cadastro = Cadastro(texto: texto, numerico: numerico);
     try {
-      int id = await _dbHelper.insert(cadastro.toMap());
+      int id = await _dbHelper.insertCadastro(cadastro); // Método alterado para insertCadastro
       print('Novo cadastro com ID: $id');
       _resetForm();
     } catch (e) {
