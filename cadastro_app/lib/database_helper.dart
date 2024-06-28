@@ -1,68 +1,67 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'dart:async';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
+  static final _databaseName = "cadastro.db";
+  static final _databaseVersion = 1;
+
+  static final tableCadastro = 'cadastro';
+  static final tableLog = 'log';
+
+  static final columnId = 'id';
+  static final columnTexto = 'texto';
+  static final columnNumerico = 'numerico';
+  static final columnDataHora = 'data_hora';
+  static final columnTipoOperacao = 'tipo_operacao';
+
+  // Singleton instance
+  DatabaseHelper._privateConstructor();
+  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
 
   static Database? _database;
 
-  DatabaseHelper._init();
-
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('cadastro.db');
+    _database = await _initDatabase();
     return _database!;
   }
 
-  Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
-
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+  _initDatabase() async {
+    final db = await databaseFactoryFfi.openDatabase(
+      _databaseName,
+      options: OpenDatabaseOptions(
+        version: _databaseVersion,
+        onCreate: _onCreate,
+      ),
+    );
+    return db;
   }
 
-  Future _createDB(Database db, int version) async {
-    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    const textType = 'TEXT NOT NULL';
-    const intType = 'INTEGER NOT NULL';
-
+  Future _onCreate(Database db, int version) async {
     await db.execute('''
-CREATE TABLE cadastro (
-  id $idType,
-  texto $textType,
-  numerico $intType
-)
-''');
+          CREATE TABLE $tableCadastro (
+            $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+            $columnTexto TEXT NOT NULL,
+            $columnNumerico INTEGER NOT NULL UNIQUE CHECK ($columnNumerico > 0)
+          )
+          ''');
+    await db.execute('''
+          CREATE TABLE $tableLog (
+            $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+            $columnDataHora TEXT NOT NULL,
+            $columnTipoOperacao TEXT NOT NULL
+          )
+          ''');
   }
 
   Future<int> insertCadastro(Map<String, dynamic> row) async {
-    final db = await instance.database;
-
-    return await db.insert('cadastro', row);
-  }
-
-  Future<List<Map<String, dynamic>>> queryAll() async {
-    final db = await instance.database;
-
-    return await db.query('cadastro');
+    Database db = await instance.database;
+    int id = await db.insert(tableCadastro, row);
+    await _insertLog(db, 'Insert');
+    return id;
   }
 
   Future<int> updateCadastro(Map<String, dynamic> row) async {
-    final db = await instance.database;
-    final id = row['id'];
-
-    return await db.update('cadastro', row, where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<int> deleteCadastro(int id) async {
-    final db = await instance.database;
-
-    return await db.delete('cadastro', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future close() async {
-    final db = await instance.database;
-
-    db.close();
-  }
-}
+    Database db = await instance.database;
+    int id = row[columnId];
+    int result = await db.update(tableCadastro, row, where: '$columnId = ?',

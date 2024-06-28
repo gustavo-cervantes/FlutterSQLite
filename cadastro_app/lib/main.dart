@@ -37,6 +37,20 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _textoController = TextEditingController();
   final TextEditingController _numericoController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  List<Cadastro> _cadastros = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCadastros();
+  }
+
+  Future<void> _loadCadastros() async {
+    final data = await _dbHelper.queryAll();
+    setState(() {
+      _cadastros = data.map((item) => Cadastro.fromMap(item)).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +78,37 @@ class _HomePageState extends State<HomePage> {
               onPressed: _insertCadastro,
               child: Text('Inserir Cadastro'),
             ),
+            SizedBox(height: 16.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _cadastros.length,
+                itemBuilder: (context, index) {
+                  final cadastro = _cadastros[index];
+                  return ListTile(
+                    title: Text(cadastro.texto),
+                    subtitle: Text(cadastro.numerico.toString()),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            _textoController.text = cadastro.texto;
+                            _numericoController.text = cadastro.numerico.toString();
+                            // Para atualizar um cadastro existente
+                            _updateCadastro(cadastro);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () => _deleteCadastro(cadastro.id!),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -84,8 +129,37 @@ class _HomePageState extends State<HomePage> {
       int id = await _dbHelper.insertCadastro(cadastro.toMap());
       print('Novo cadastro com ID: $id');
       _resetForm();
+      _loadCadastros();
     } catch (e) {
       _showErrorDialog('Erro ao inserir cadastro: ${e.toString()}');
+    }
+  }
+
+  Future<void> _updateCadastro(Cadastro cadastro) async {
+    String texto = _textoController.text.trim();
+    int numerico = int.tryParse(_numericoController.text.trim()) ?? 0;
+
+    if (texto.isEmpty || numerico <= 0) {
+      _showErrorDialog('Todos os campos são obrigatórios e o campo numérico deve ser maior que zero.');
+      return;
+    }
+
+    Cadastro updatedCadastro = Cadastro(id: cadastro.id, texto: texto, numerico: numerico);
+    try {
+      await _dbHelper.updateCadastro(updatedCadastro.toMap());
+      _resetForm();
+      _loadCadastros();
+    } catch (e) {
+      _showErrorDialog('Erro ao atualizar cadastro: ${e.toString()}');
+    }
+  }
+
+  Future<void> _deleteCadastro(int id) async {
+    try {
+      await _dbHelper.deleteCadastro(id);
+      _loadCadastros();
+    } catch (e) {
+      _showErrorDialog('Erro ao deletar cadastro: ${e.toString()}');
     }
   }
 
