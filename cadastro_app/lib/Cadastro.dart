@@ -3,17 +3,18 @@ class Cadastro {
   final String texto;
   final int numerico;
 
-  Cadastro({this.id, required this.texto, required this.numerico});
+  Cadastro({
+    this.id,
+    required this.texto,
+    required this.numerico,
+  });
 
   Map<String, dynamic> toMap() {
-    final map = {
+    return {
+      'id': id,
       'texto': texto,
       'numerico': numerico,
     };
-    if (id != null) {
-      map['id'] = id as Object;
-    }
-    return map;
   }
 
   factory Cadastro.fromMap(Map<String, dynamic> map) {

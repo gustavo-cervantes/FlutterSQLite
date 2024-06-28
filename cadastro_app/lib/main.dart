@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'cadastro.dart'; // Importe a classe Cadastro
 import 'database_helper.dart';
-import 'cadastro.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializa o suporte ao FFI
-  sqfliteFfiInit();
-
-  // Define o databaseFactory para utilizar o sqflite_common_ffi
-  databaseFactory = databaseFactoryFfi;
+  sqfliteFfiInit(); // Inicializa o sqflite_common_ffi
+  databaseFactory = databaseFactoryFfi; // Configura o databaseFactory
 
   runApp(MyApp());
 }
@@ -46,73 +42,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadCadastros() async {
-    final data = await _dbHelper.queryAll();
+    List<Cadastro> cadastros = await _dbHelper.queryAllCadastros();
     setState(() {
-      _cadastros = data.map((item) => Cadastro.fromMap(item)).toList();
+      _cadastros = cadastros;
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cadastro'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _textoController,
-              decoration: InputDecoration(labelText: 'Texto'),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: _numericoController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Numérico'),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _insertCadastro,
-              child: Text('Inserir Cadastro'),
-            ),
-            SizedBox(height: 16.0),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _cadastros.length,
-                itemBuilder: (context, index) {
-                  final cadastro = _cadastros[index];
-                  return ListTile(
-                    title: Text(cadastro.texto),
-                    subtitle: Text(cadastro.numerico.toString()),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            _textoController.text = cadastro.texto;
-                            _numericoController.text = cadastro.numerico.toString();
-                            // Para atualizar um cadastro existente
-                            _updateCadastro(cadastro);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () => _deleteCadastro(cadastro.id!),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _insertCadastro() async {
@@ -124,10 +57,10 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    Cadastro cadastro = Cadastro(texto: texto, numerico: numerico);
+    Cadastro newCadastro = Cadastro(texto: texto, numerico: numerico);
     try {
-      int id = await _dbHelper.insertCadastro(cadastro.toMap());
-      print('Novo cadastro com ID: $id');
+      int id = await _dbHelper.insertCadastro(newCadastro);
+      print('Novo cadastro inserido com ID: $id');
       _resetForm();
       _loadCadastros();
     } catch (e) {
@@ -146,7 +79,7 @@ class _HomePageState extends State<HomePage> {
 
     Cadastro updatedCadastro = Cadastro(id: cadastro.id, texto: texto, numerico: numerico);
     try {
-      await _dbHelper.updateCadastro(updatedCadastro.toMap());
+      await _dbHelper.updateCadastro(updatedCadastro);
       _resetForm();
       _loadCadastros();
     } catch (e) {
@@ -185,6 +118,70 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cadastro App'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _textoController,
+              decoration: InputDecoration(labelText: 'Texto'),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _numericoController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Numérico'),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _insertCadastro,
+              child: Text('Inserir Cadastro'),
+            ),
+            SizedBox(height: 16.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _cadastros.length,
+                itemBuilder: (context, index) {
+                  final cadastro = _cadastros[index];
+                  return ListTile(
+                    title: Text(cadastro.texto),
+                    subtitle: Text(cadastro.numerico.toString()),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            _textoController.text = cadastro.texto;
+                            _numericoController.text = cadastro.numerico.toString();
+                            _updateCadastro(cadastro);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            _deleteCadastro(cadastro.id!);
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
