@@ -1,7 +1,5 @@
-import 'dart:async';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'cadastro.dart'; // Certifique-se de importar a classe Cadastro correta
+import 'cadastro.dart';
 
 class DatabaseHelper {
   static final _databaseName = "cadastro.db";
@@ -19,11 +17,11 @@ class DatabaseHelper {
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
 
-  static late Database _database;
+  static Database? _database;
 
   Future<Database> get database async {
-    _database = await _initDatabase();
-    return _database;
+    _database ??= await _initDatabase();
+    return _database!;
   }
 
   Future<Database> _initDatabase() async {
@@ -108,5 +106,10 @@ class DatabaseHelper {
       columnTipoOperacao: operation,
     };
     await db.insert(tableLog, log);
+  }
+
+  Future<List<Map<String, dynamic>>> queryAllLogs() async {
+    Database db = await instance.database;
+    return await db.query(tableLog);
   }
 }

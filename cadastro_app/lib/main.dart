@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'cadastro.dart'; // Importe a classe Cadastro
 import 'database_helper.dart';
+import 'cadastro.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  sqfliteFfiInit(); // Inicializa o sqflite_common_ffi
-  databaseFactory = databaseFactoryFfi; // Configura o databaseFactory
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
   runApp(MyApp());
 }
@@ -53,7 +53,8 @@ class _HomePageState extends State<HomePage> {
     int numerico = int.tryParse(_numericoController.text.trim()) ?? 0;
 
     if (texto.isEmpty || numerico <= 0) {
-      _showErrorDialog('Todos os campos são obrigatórios e o campo numérico deve ser maior que zero.');
+      _showErrorDialog(
+          'Todos os campos são obrigatórios e o campo numérico deve ser maior que zero.');
       return;
     }
 
@@ -73,11 +74,13 @@ class _HomePageState extends State<HomePage> {
     int numerico = int.tryParse(_numericoController.text.trim()) ?? 0;
 
     if (texto.isEmpty || numerico <= 0) {
-      _showErrorDialog('Todos os campos são obrigatórios e o campo numérico deve ser maior que zero.');
+      _showErrorDialog(
+          'Todos os campos são obrigatórios e o campo numérico deve ser maior que zero.');
       return;
     }
 
-    Cadastro updatedCadastro = Cadastro(id: cadastro.id, texto: texto, numerico: numerico);
+    Cadastro updatedCadastro =
+        Cadastro(id: cadastro.id, texto: texto, numerico: numerico);
     try {
       await _dbHelper.updateCadastro(updatedCadastro);
       _resetForm();
@@ -163,8 +166,9 @@ class _HomePageState extends State<HomePage> {
                           icon: Icon(Icons.edit),
                           onPressed: () {
                             _textoController.text = cadastro.texto;
-                            _numericoController.text = cadastro.numerico.toString();
-                            _updateCadastro(cadastro);
+                            _numericoController.text =
+                                cadastro.numerico.toString();
+                            _updateCadastro(cadastro); // Chamada corrigida
                           },
                         ),
                         IconButton(
