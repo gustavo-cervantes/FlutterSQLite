@@ -21,8 +21,8 @@ class CadastroScreen extends StatefulWidget {
 
 class _CadastroScreenState extends State<CadastroScreen> {
   final DatabaseHelper dbHelper = DatabaseHelper();
-  final TextEditingController nomeController = TextEditingController();
-  final TextEditingController idadeController = TextEditingController();
+  final TextEditingController textoController = TextEditingController();
+  final TextEditingController numeroController = TextEditingController();
   List<Cadastro> cadastros = [];
   Cadastro? selectedCadastro;
 
@@ -39,36 +39,37 @@ class _CadastroScreenState extends State<CadastroScreen> {
     });
   }
 
-  void _insertCadastro() async {
-    String nome = nomeController.text;
-    int idade = int.tryParse(idadeController.text) ?? 0;
-    if (nome.isNotEmpty && idade > 0) {
-      try {
-        await dbHelper.insertCadastro(Cadastro(nome: nome, idade: idade));
-        nomeController.clear();
-        idadeController.clear();
-        _loadCadastros();
-      } catch (e) {
-        _showErrorDialog(e.toString());
-      }
-    } else {
-      _showErrorDialog('Todos os campos são obrigatórios e a idade deve ser maior que zero.');
+void _insertCadastro() async {
+  String texto = textoController.text;
+  int numero = int.tryParse(numeroController.text) ?? 0;
+  if (texto.isNotEmpty && numero > 0) {
+    try {
+      await dbHelper.insertCadastro(Cadastro(texto: texto, numero: numero));
+      textoController.clear();
+      numeroController.clear();
+      _loadCadastros();
+    } catch (e) {
+      _showErrorDialog(e.toString());
     }
+  } else {
+    _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
   }
+}
+
 
   void _updateCadastro() async {
     if (selectedCadastro != null) {
-      String nome = nomeController.text;
-      int idade = int.tryParse(idadeController.text) ?? 0;
-      if (nome.isNotEmpty && idade > 0) {
+      String texto = textoController.text;
+      int numero = int.tryParse(numeroController.text) ?? 0;
+      if (texto.isNotEmpty && numero > 0) {
         try {
           await dbHelper.updateCadastro(Cadastro(
             id: selectedCadastro!.id,
-            nome: nome,
-            idade: idade,
+            texto: texto,
+            numero: numero,
           ));
-          nomeController.clear();
-          idadeController.clear();
+          textoController.clear();
+          numeroController.clear();
           setState(() {
             selectedCadastro = null;
           });
@@ -77,7 +78,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
           _showErrorDialog(e.toString());
         }
       } else {
-        _showErrorDialog('Todos os campos são obrigatórios e a idade deve ser maior que zero.');
+        _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
       }
     }
   }
@@ -86,8 +87,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
     if (selectedCadastro != null) {
       try {
         await dbHelper.deleteCadastro(selectedCadastro!.id!);
-        nomeController.clear();
-        idadeController.clear();
+        textoController.clear();
+        numeroController.clear();
         setState(() {
           selectedCadastro = null;
         });
@@ -103,8 +104,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
   void _selectCadastro(Cadastro cadastro) {
     setState(() {
       selectedCadastro = cadastro;
-      nomeController.text = cadastro.nome;
-      idadeController.text = cadastro.idade.toString();
+      textoController.text = cadastro.texto;
+      numeroController.text = cadastro.numero.toString();
     });
   }
 
@@ -139,12 +140,12 @@ class _CadastroScreenState extends State<CadastroScreen> {
             child: Column(
               children: [
                 TextField(
-                  controller: nomeController,
+                  controller: textoController,
                   decoration: InputDecoration(labelText: 'Texto'),
                 ),
                 TextField(
-                  controller: idadeController,
-                  decoration: InputDecoration(labelText: 'Numero'),
+                  controller: numeroController,
+                  decoration: InputDecoration(labelText: 'Número'),
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 10),
@@ -174,8 +175,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
               itemBuilder: (context, index) {
                 Cadastro cadastro = cadastros[index];
                 return ListTile(
-                  title: Text(cadastro.nome),
-                  subtitle: Text('Número: ${cadastro.idade}'),
+                  title: Text(cadastro.texto),
+                  subtitle: Text('Número: ${cadastro.numero}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

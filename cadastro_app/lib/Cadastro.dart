@@ -1,23 +1,23 @@
 class Cadastro {
-  final int? id;
-  final String nome;
-  final int idade;
+  int? id;
+  String texto; // Anteriormente "nome"
+  int numero;   // Anteriormente "idade"
 
-  Cadastro({this.id, required this.nome, required this.idade});
+  Cadastro({this.id, required this.texto, required this.numero});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'nome': nome,
-      'idade': idade,
+      'texto': texto,
+      'numero': numero,
     };
-  }
+  }                                           
 
-  factory Cadastro.fromMap(Map<String, dynamic> map) {
+  static Cadastro fromMap(Map<String, dynamic> map) {
     return Cadastro(
       id: map['id'],
-      nome: map['nome'],
-      idade: map['idade'],
+      texto: map['texto'],
+      numero: map['numero'],
     );
   }
 }
