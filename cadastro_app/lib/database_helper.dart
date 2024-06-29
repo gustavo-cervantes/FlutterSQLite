@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'cadastro.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -29,28 +29,36 @@ class DatabaseHelper {
     String path = join(documentsDirectory.path, 'cadastro.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Incrementar a versão do banco de dados para forçar recriação
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
-Future _onCreate(Database db, int version) async {
-  await db.execute('''
-    CREATE TABLE cadastros (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      texto TEXT NOT NULL,
-      numero INTEGER NOT NULL
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE log_operacoes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      data_hora TEXT NOT NULL,
-      tipo_operacao TEXT NOT NULL
-    )
-  ''');
-}
+  Future _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE cadastros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        texto TEXT NOT NULL UNIQUE,
+        numero INTEGER NOT NULL UNIQUE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE log_operacoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        data_hora TEXT NOT NULL,
+        tipo_operacao TEXT NOT NULL
+      )
+    ''');
+  }
 
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Recriar a tabela cadastros com as novas restrições
+      await db.execute('DROP TABLE IF EXISTS cadastros');
+      await _onCreate(db, newVersion);
+    }
+  }
 
   Future<List<Cadastro>> getCadastros() async {
     final db = await database;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'database_helper.dart';
 import 'cadastro.dart';
 
@@ -49,13 +50,16 @@ void _insertCadastro() async {
       numeroController.clear();
       _loadCadastros();
     } catch (e) {
-      _showErrorDialog(e.toString());
+      if (e is DatabaseException && e.isUniqueConstraintError()) {
+        _showErrorDialog('Erro: O texto ou número já existe.');
+      } else {
+        _showErrorDialog(e.toString());
+      }
     }
   } else {
     _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
   }
 }
-
 
   void _updateCadastro() async {
     if (selectedCadastro != null) {
