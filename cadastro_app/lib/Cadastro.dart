@@ -1,7 +1,7 @@
 class Cadastro {
   int? id;
-  String texto; // Anteriormente "nome"
-  int numero;   // Anteriormente "idade"
+  String texto;
+  int numero;
 
   Cadastro({this.id, required this.texto, required this.numero});
 

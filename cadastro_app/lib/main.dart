@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'database_helper.dart';
 import 'cadastro.dart';
 
@@ -40,26 +39,22 @@ class _CadastroScreenState extends State<CadastroScreen> {
     });
   }
 
-void _insertCadastro() async {
-  String texto = textoController.text;
-  int numero = int.tryParse(numeroController.text) ?? 0;
-  if (texto.isNotEmpty && numero > 0) {
-    try {
-      await dbHelper.insertCadastro(Cadastro(texto: texto, numero: numero));
-      textoController.clear();
-      numeroController.clear();
-      _loadCadastros();
-    } catch (e) {
-      if (e is DatabaseException && e.isUniqueConstraintError()) {
-        _showErrorDialog('Erro: O texto ou número já existe.');
-      } else {
+  void _insertCadastro() async {
+    String texto = textoController.text;
+    int numero = int.tryParse(numeroController.text) ?? 0;
+    if (texto.isNotEmpty && numero > 0) {
+      try {
+        await dbHelper.insertCadastro(Cadastro(texto: texto, numero: numero));
+        textoController.clear();
+        numeroController.clear();
+        _loadCadastros();
+      } catch (e) {
         _showErrorDialog(e.toString());
       }
+    } else {
+      _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
     }
-  } else {
-    _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
   }
-}
 
   void _updateCadastro() async {
     if (selectedCadastro != null) {
@@ -181,19 +176,7 @@ void _insertCadastro() async {
                 return ListTile(
                   title: Text(cadastro.texto),
                   subtitle: Text('Número: ${cadastro.numero}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () => _selectCadastro(cadastro),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () => _deleteCadastro(),
-                      ),
-                    ],
-                  ),
+                  onTap: () => _selectCadastro(cadastro),
                 );
               },
             ),
