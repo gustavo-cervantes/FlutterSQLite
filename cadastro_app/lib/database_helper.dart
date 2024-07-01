@@ -29,7 +29,6 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
     );
   }
 
@@ -50,10 +49,6 @@ class DatabaseHelper {
     ''');
   }
 
-  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Adicione aqui a lógica de atualização do banco de dados, se necessário
-  }
-
   Future<List<Cadastro>> getCadastros() async {
     final db = await database;
     var result = await db.query('cadastros');
@@ -67,7 +62,7 @@ class DatabaseHelper {
       await _logOperacao('Insert');
     } catch (e) {
       if (e is DatabaseException && e.isUniqueConstraintError()) {
-        throw Exception('Número já existe. Cada número deve ser único.');
+        throw Exception('Número já existente no nosso banco de dados, cada número/ID deve ser único!');
       }
       throw e;
     }
@@ -85,7 +80,7 @@ class DatabaseHelper {
       await _logOperacao('Update');
     } catch (e) {
       if (e is DatabaseException && e.isUniqueConstraintError()) {
-        throw Exception('Número já existe. Cada número deve ser único.');
+        throw Exception('Número já existente no nosso banco de dados, cada número/ID deve ser único!');
       }
       throw e;
     }

@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cadastro App',
+      title: 'CervantesCadastro',
       home: CadastroScreen(),
     );
   }
@@ -52,7 +52,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
         _showErrorDialog(e.toString());
       }
     } else {
-      _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
+      _showErrorDialog('Todos os campos são obrigatórios/O número deve ser maior que zero.');
     }
   }
 
@@ -77,7 +77,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
           _showErrorDialog(e.toString());
         }
       } else {
-        _showErrorDialog('Todos os campos são obrigatórios e o número deve ser maior que zero.');
+        _showErrorDialog('Todos os campos são obrigatórios/O número deve ser maior que zero.');
       }
     }
   }
@@ -130,7 +130,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cadastro App'),
+        title: Text('CervantesCadastro'),
       ),
       body: Column(
         children: [
